@@ -24,5 +24,5 @@ COPY . .
 # Expose port for the application
 EXPOSE 8000
 
-# Command to run the application
-CMD ["python", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Command to run the Django development server (DRF)
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
