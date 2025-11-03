@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from .routers import expenses
+from .routers import tasks
 
-app = FastAPI(title="Expense Splitter API")
+app = FastAPI(title="TaskFlow API")
 
-app.include_router(expenses.router, prefix="/expenses", tags=["expenses"])
+app.include_router(tasks.router, prefix="/tasks", tags=["tasks"])
