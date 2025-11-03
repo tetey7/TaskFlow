@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     db_port: int
 
     allowed_hosts: List[str]
+    cors_allowed_origins: List[str] = []
 
     class Config:
         env_file = ".env"
