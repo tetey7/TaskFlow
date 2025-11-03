@@ -21,7 +21,7 @@ TaskFlow/
 │   │   ├── settings.py      # Django settings
 │   │   ├── env_settings.py  # Environment-based settings
 │   │   └── urls.py          # URL routing
-│   ├── expenses/            # Django app for expenses
+│   ├── tasks/               # Django app for tasks
 │   ├── manage.py            # Django management script
 │   ├── main.py              # Application entry point
 │   ├── pyproject.toml       # Python dependencies
@@ -62,8 +62,8 @@ TaskFlow/
 
 1. Clone the repository:
    ```bash
-   git clone git@github.com:FarmersClub/ExpenseSplitterApp.git
-   cd ExpenseSplitterApp
+   git clone git@github.com:FarmersClub/TaskFlow.git
+   cd TaskFlow
    ```
 
 2. Set up environment variables:
@@ -121,7 +121,7 @@ TaskFlow/
 
 5. **Accessing PostgreSQL**:
    ```bash
-   docker-compose exec db psql -U postgres -d expenses
+   docker-compose exec db psql -U postgres -d tasks
    ```
 
 ### Manual Backend Setup

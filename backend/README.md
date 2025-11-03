@@ -1,7 +1,7 @@
-# TaskFlow Backend
+# ExpenseSplitterApp Backend
 
 ## Overview
-This is the backend service for the TaskFlow, a platform designed to help users manage their tasks and projects.
+This is the backend service for the ExpenseSplitterApp, a platform designed to help users split expenses among friends, roommates, or groups. The backend is built using Django and FastAPI, providing a robust API for expense tracking and management.
 
 ## Tech Stack
 - **Django**: Web framework for database models and admin interface
