@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 from .env_settings import settings
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -6,16 +7,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = settings.secret_key
 DEBUG = settings.debug
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": settings.db_name,
-        "USER": settings.db_user,
-        "PASSWORD": settings.db_password,
-        "HOST": settings.db_host,
-        "PORT": settings.db_port,
+# Use SQLite for tests, PostgreSQL for production
+TESTING = 'pytest' in sys.modules or 'test' in sys.argv
+
+if TESTING:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": settings.db_name,
+            "USER": settings.db_user,
+            "PASSWORD": settings.db_password,
+            "HOST": settings.db_host,
+            "PORT": settings.db_port,
+        }
+    }
 
 ALLOWED_HOSTS = settings.allowed_hosts
 
