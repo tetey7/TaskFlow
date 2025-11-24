@@ -1,6 +1,9 @@
-import os, django
+import os
+
+import django
 from fastapi import FastAPI
-from .routers import tasks, health
+
+from .routers import health, tasks
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
