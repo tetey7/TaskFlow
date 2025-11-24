@@ -30,7 +30,7 @@ else:
         }
     }
 
-ALLOWED_HOSTS = settings.allowed_hosts
+ALLOWED_HOSTS = settings.allowed_hosts + ["backend"]
 
 
 # Application definition
