@@ -1,24 +1,11 @@
 from django.urls import path
+from rest_framework.routers import DefaultRouter
 
 from . import views
 
+router = DefaultRouter()
+router.register(r"tasks", views.TaskViewSet, basename="tasks")
+
 urlpatterns = [
     path("health/", views.health, name="health"),
-    path(
-        "tasks/",
-        views.TaskViewSet.as_view({"get": "list", "post": "create"}),
-        name="tasks-list",
-    ),
-    path(
-        "tasks/<int:pk>/",
-        views.TaskViewSet.as_view(
-            {
-                "get": "retrieve",
-                "put": "update",
-                "patch": "partial_update",
-                "delete": "destroy",
-            }
-        ),
-        name="tasks-detail",
-    ),
-]
+] + router.urls
