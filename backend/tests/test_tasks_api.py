@@ -47,3 +47,41 @@ class TestTaskAPI:
         assert response.status_code == 201
         assert Task.objects.count() == 1
         assert Task.objects.first().title == "New Task"
+
+    def test_retrieve_task(self, api_client, sample_task):
+        """Test retrieving a single task."""
+        url = reverse("tasks-detail", kwargs={"pk": sample_task.pk})
+        response = api_client.get(url)
+
+        assert response.status_code == 200
+        assert response.data["title"] == "Test Task"
+
+    def test_update_task(self, api_client, sample_task):
+        """Test updating a task."""
+        url = reverse("tasks-detail", kwargs={"pk": sample_task.pk})
+        data = {
+            "title": "Updated Task",
+            "description": "Updated",
+            "priority": "low",
+            "completed": True,
+        }
+        response = api_client.put(url, data, format="json")
+
+        assert response.status_code == 200
+        assert response.data["title"] == "Updated Task"
+
+    def test_partial_update_task(self, api_client, sample_task):
+        """Test partially updating a task."""
+        url = reverse("tasks-detail", kwargs={"pk": sample_task.pk})
+        response = api_client.patch(url, {"completed": True}, format="json")
+
+        assert response.status_code == 200
+        assert response.data["completed"] is True
+
+    def test_delete_task(self, api_client, sample_task):
+        """Test deleting a task."""
+        url = reverse("tasks-detail", kwargs={"pk": sample_task.pk})
+        response = api_client.delete(url)
+
+        assert response.status_code == 204
+        assert Task.objects.count() == 0
