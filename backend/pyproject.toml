@@ -11,6 +11,8 @@ dependencies = [
     "psycopg>=3.2.9",
     "pydantic>=2.11.7",
     "pydantic-settings>=2.0.3",
+    "gunicorn>=23.0.0",
+    "dj-database-url>=2.3.0",
 ]
 
 [project.optional-dependencies]
