@@ -64,6 +64,38 @@ export default function TasksPage() {
     setIsDeleteModalOpen(true);
   };
 
+  const handleToggleComplete = async (task: Task) => {
+    setTasks(prevTasks =>
+      prevTasks.map(t =>
+        t.id === task.id ? { ...t, completed: !t.completed } : t
+      )
+    );
+
+    try {
+      const response = await fetch(`/api/tasks/${task.id}/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...task,
+          completed: !task.completed,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error toggling task completion:', error);
+      setTasks(prevTasks =>
+        prevTasks.map(t =>
+          t.id === task.id ? { ...t, completed: task.completed } : t
+        )
+      );
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header onNewTask={handleNewTask} />
@@ -103,6 +135,7 @@ export default function TasksPage() {
                 task={task}
                 onEdit={handleEditTask}
                 onDelete={handleDeleteTask}
+                onToggleComplete={handleToggleComplete}
               />
             ))}
           </div>
