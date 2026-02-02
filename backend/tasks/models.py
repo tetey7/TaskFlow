@@ -16,6 +16,7 @@ class Task(models.Model):
     )
     due_date = models.DateField(null=True, blank=True)
     completed = models.BooleanField(default=False)
+    sort_order = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

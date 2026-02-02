@@ -1,6 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import Header from '@/components/Header';
 import TaskFormModal from '@/components/TaskFormModal';
 import DeleteTaskModal from '@/components/DeleteTaskModal';
@@ -12,6 +16,45 @@ interface Task {
   description: string;
   priority: string;
   completed: boolean;
+  sort_order: number;
+}
+
+interface SortableTaskCardProps {
+  task: Task;
+  onEdit: (task: Task) => void;
+  onDelete: (task: Task) => void;
+  onToggleComplete: (task: Task) => void;
+  onTaskUpdate: (task: Task) => void;
+}
+
+function SortableTaskCard({ task, onEdit, onDelete, onToggleComplete, onTaskUpdate }: SortableTaskCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    cursor: 'grab',
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <TaskCard
+        task={task}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onToggleComplete={onToggleComplete}
+        onTaskUpdate={onTaskUpdate}
+      />
+    </div>
+  );
 }
 
 export default function TasksPage() {
@@ -21,6 +64,23 @@ export default function TasksPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const fetchTasks = () => {
     setLoading(true);
@@ -96,6 +156,53 @@ export default function TasksPage() {
     }
   };
 
+  const handleTaskUpdate = (updatedTask: Task) => {
+    setTasks(prevTasks =>
+      prevTasks.map(t =>
+        t.id === updatedTask.id ? updatedTask : t
+      )
+    );
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = tasks.findIndex((task) => task.id === active.id);
+      const newIndex = tasks.findIndex((task) => task.id === over.id);
+
+      const newTasks = arrayMove(tasks, oldIndex, newIndex);
+      const updatedTasks = newTasks.map((task, index) => ({
+        ...task,
+        sort_order: index,
+      }));
+
+      setTasks(updatedTasks);
+
+      try {
+        const taskOrders = updatedTasks.map((task) => ({
+          id: task.id,
+          sort_order: task.sort_order,
+        }));
+
+        const response = await fetch('/api/tasks/reorder/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ task_orders: taskOrders }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+      } catch (error) {
+        console.error('Error reordering tasks:', error);
+        fetchTasks();
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header onNewTask={handleNewTask} />
@@ -128,17 +235,29 @@ export default function TasksPage() {
             <p className="text-gray-500">No tasks yet. Create your first task to get started!</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {tasks.map(task => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onEdit={handleEditTask}
-                onDelete={handleDeleteTask}
-                onToggleComplete={handleToggleComplete}
-              />
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={tasks.map((task) => task.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-4">
+                {tasks.map(task => (
+                  <SortableTaskCard
+                    key={task.id}
+                    task={task}
+                    onEdit={handleEditTask}
+                    onDelete={handleDeleteTask}
+                    onToggleComplete={handleToggleComplete}
+                    onTaskUpdate={handleTaskUpdate}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
       </main>
     </div>
