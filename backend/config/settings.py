@@ -64,6 +64,12 @@ if DEBUG:
 else:
     CORS_ALLOWED_ORIGINS = settings.cors_allowed_origins
 
+# REST Framework
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [],
+    "DEFAULT_PERMISSION_CLASSES": [],
+}
+
 ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [

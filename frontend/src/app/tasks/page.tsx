@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
+import TaskFormModal from '@/components/TaskFormModal';
+import DeleteTaskModal from '@/components/DeleteTaskModal';
+import TaskCard from '@/components/TaskCard';
 
 interface Task {
   id: number;
@@ -14,10 +17,13 @@ interface Task {
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
 
-  useEffect(() => {
-    // Fetch from Django API through Next.js proxy
-    // Always use trailing slash for Django compatibility
+  const fetchTasks = () => {
+    setLoading(true);
     fetch('/api/tasks/')
       .then(res => {
         if (!res.ok) {
@@ -33,13 +39,50 @@ export default function TasksPage() {
         console.error('Error fetching tasks:', error);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchTasks();
   }, []);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
+  const handleNewTask = () => {
+    setFormMode('create');
+    setSelectedTask(null);
+    setIsFormModalOpen(true);
+  };
+
+  const handleEditTask = (task: Task) => {
+    setFormMode('edit');
+    setSelectedTask(task);
+    setIsFormModalOpen(true);
+  };
+
+  const handleDeleteTask = (task: Task) => {
+    setSelectedTask(task);
+    setIsDeleteModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header onNewTask={() => console.log('Create new task')} />
+      <Header onNewTask={handleNewTask} />
+
+      <TaskFormModal
+        isOpen={isFormModalOpen}
+        onClose={() => setIsFormModalOpen(false)}
+        onSuccess={fetchTasks}
+        task={selectedTask}
+        mode={formMode}
+      />
+
+      <DeleteTaskModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onSuccess={fetchTasks}
+        taskId={selectedTask?.id || null}
+        taskTitle={selectedTask?.title || ''}
+      />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -55,52 +98,12 @@ export default function TasksPage() {
         ) : (
           <div className="space-y-4">
             {tasks.map(task => (
-              <div
+              <TaskCard
                 key={task.id}
-                className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h2 className="text-xl font-semibold text-gray-900">{task.title}</h2>
-                    <p className="text-gray-600 mt-2">{task.description}</p>
-                    <div className="flex items-center space-x-4 mt-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          task.priority === 'high'
-                            ? 'bg-red-100 text-red-800'
-                            : task.priority === 'medium'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-green-100 text-green-800'
-                        }`}
-                      >
-                        {task.priority}
-                      </span>
-                      <span
-                        className={`text-sm ${
-                          task.completed ? 'text-green-600' : 'text-gray-500'
-                        }`}
-                      >
-                        {task.completed ? '✓ Completed' : 'In Progress'}
-                      </span>
-                    </div>
-                  </div>
-                  <button className="text-gray-400 hover:text-gray-600">
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
+                task={task}
+                onEdit={handleEditTask}
+                onDelete={handleDeleteTask}
+              />
             ))}
           </div>
         )}
