@@ -1,9 +1,16 @@
 from typing import List, Optional
 
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    model_config = ConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
     # Required backend settings
     debug: bool = False
     secret_key: str
@@ -17,11 +24,6 @@ class Settings(BaseSettings):
 
     allowed_hosts: List[str] = []
     cors_allowed_origins: List[str] = []
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
 
 
 settings = Settings()
