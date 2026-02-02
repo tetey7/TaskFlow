@@ -24,5 +24,5 @@ COPY . .
 # Expose port for the application
 EXPOSE 8000
 
-# Command to run the Django development server (DRF)
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Run migrations and start Gunicorn
+CMD python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000}

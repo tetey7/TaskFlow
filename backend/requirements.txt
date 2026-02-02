@@ -3,6 +3,7 @@ asgiref==3.10.0
 Django==5.2.7
 django-cors-headers==4.9.0
 djangorestframework==3.16.1
+gunicorn==23.0.0
 psycopg==3.2.12
 pydantic==2.12.3
 pydantic-settings==2.11.0
