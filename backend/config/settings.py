@@ -42,12 +42,16 @@ else:
             }
         }
 
-ALLOWED_HOSTS = settings.allowed_hosts + [
-    "backend",
-    "localhost",
-    "127.0.0.1",
-    ".railway.internal",
-]
+# Allow all hosts if DATABASE_URL is set (Railway environment)
+# Otherwise use configured allowed_hosts
+if os.environ.get("DATABASE_URL"):
+    ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = settings.allowed_hosts + [
+        "backend",
+        "localhost",
+        "127.0.0.1",
+    ]
 
 
 # Application definition
