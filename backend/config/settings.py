@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -19,16 +20,27 @@ if TESTING:
         }
     }
 else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": settings.db_name,
-            "USER": settings.db_user,
-            "PASSWORD": settings.db_password,
-            "HOST": settings.db_host,
-            "PORT": settings.db_port,
+    # Check if DATABASE_URL is provided (Railway/Heroku style)
+    database_url = os.environ.get("DATABASE_URL")
+    if database_url:
+        # Parse DATABASE_URL for Railway/Heroku
+        import dj_database_url
+
+        DATABASES = {
+            "default": dj_database_url.config(default=database_url, conn_max_age=600)
         }
-    }
+    else:
+        # Use individual environment variables (Docker Compose style)
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": settings.db_name,
+                "USER": settings.db_user,
+                "PASSWORD": settings.db_password,
+                "HOST": settings.db_host,
+                "PORT": settings.db_port,
+            }
+        }
 
 ALLOWED_HOSTS = settings.allowed_hosts + ["backend"]
 

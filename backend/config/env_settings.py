@@ -1,21 +1,21 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     # Required backend settings
-    debug: bool
+    debug: bool = False
     secret_key: str
 
-    # Database settings
-    db_name: str
-    db_user: str
-    db_password: str
-    db_host: str
-    db_port: int
+    # Database settings (optional if DATABASE_URL is provided)
+    db_name: Optional[str] = None
+    db_user: Optional[str] = None
+    db_password: Optional[str] = None
+    db_host: Optional[str] = None
+    db_port: Optional[int] = None
 
-    allowed_hosts: List[str]
+    allowed_hosts: List[str] = []
     cors_allowed_origins: List[str] = []
 
     class Config:
