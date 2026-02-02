@@ -21,15 +21,11 @@ RUN uv sync && uv pip install --system -e .
 # Copy project files
 COPY . .
 
+# Make startup script executable
+RUN chmod +x start.sh
+
 # Expose port for the application
 EXPOSE 8000
 
-# Run migrations and start Gunicorn
-CMD python manage.py migrate && \
-    echo "Starting Gunicorn on port ${PORT:-8000}..." && \
-    gunicorn config.wsgi:application \
-    --bind 0.0.0.0:${PORT:-8000} \
-    --workers 2 \
-    --log-level info \
-    --access-logfile - \
-    --error-logfile -
+# Run startup script
+CMD ["./start.sh"]
