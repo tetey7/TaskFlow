@@ -42,7 +42,12 @@ else:
             }
         }
 
-ALLOWED_HOSTS = settings.allowed_hosts + ["backend"]
+ALLOWED_HOSTS = settings.allowed_hosts + [
+    "backend",
+    "localhost",
+    "127.0.0.1",
+    ".railway.internal",
+]
 
 
 # Application definition
