@@ -29,7 +29,9 @@ else:
         import dj_database_url
 
         DATABASES = {
-            "default": dj_database_url.config(default=database_url, conn_max_age=600)
+            "default": dj_database_url.config(
+                default=database_url, conn_max_age=600
+            )
         }
     else:
         # Use individual environment variables (Docker Compose style)
@@ -120,13 +122,21 @@ AUTH_PASSWORD_VALIDATORS = [
         ),
     },
     {
-        "NAME": ("django.contrib.auth.password_validation." "MinimumLengthValidator"),
+        "NAME": (
+            "django.contrib.auth.password_validation." "MinimumLengthValidator"
+        ),
     },
     {
-        "NAME": ("django.contrib.auth.password_validation." "CommonPasswordValidator"),
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "CommonPasswordValidator"
+        ),
     },
     {
-        "NAME": ("django.contrib.auth.password_validation." "NumericPasswordValidator"),
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "NumericPasswordValidator"
+        ),
     },
 ]
 
