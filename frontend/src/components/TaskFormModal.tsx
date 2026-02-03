@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { tasksApi } from '@/lib/api';
 import { CloseIcon } from './icons';
 
 interface Task {
@@ -48,27 +49,17 @@ export default function TaskFormModal({ isOpen, onClose, onSuccess, task, mode }
     setIsSubmitting(true);
 
     try {
-      const url = mode === 'edit' && task?.id
-        ? `/api/tasks/${task.id}/`
-        : '/api/tasks/';
+      const taskData = {
+        title,
+        description,
+        priority,
+        completed,
+      };
 
-      const method = mode === 'edit' ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title,
-          description,
-          priority,
-          completed,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (mode === 'edit' && task?.id) {
+        await tasksApi.update(task.id, taskData);
+      } else {
+        await tasksApi.create(taskData);
       }
 
       setTitle('');

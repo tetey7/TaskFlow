@@ -9,15 +9,8 @@ import Header from '@/components/Header';
 import TaskFormModal from '@/components/TaskFormModal';
 import DeleteTaskModal from '@/components/DeleteTaskModal';
 import TaskCard from '@/components/TaskCard';
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  priority: string;
-  completed: boolean;
-  sort_order: number;
-}
+import { Task } from '@/types/task';
+import { tasksApi } from '@/lib/api';
 
 interface SortableTaskCardProps {
   task: Task;
@@ -82,23 +75,16 @@ export default function TasksPage() {
     })
   );
 
-  const fetchTasks = () => {
+  const fetchTasks = async () => {
     setLoading(true);
-    fetch('/api/tasks/')
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then(data => {
-        setTasks(data);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching tasks:', error);
-        setLoading(false);
-      });
+    try {
+      const data = await tasksApi.getAll();
+      setTasks(data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -132,20 +118,10 @@ export default function TasksPage() {
     );
 
     try {
-      const response = await fetch(`/api/tasks/${task.id}/`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...task,
-          completed: !task.completed,
-        }),
+      await tasksApi.update(task.id, {
+        ...task,
+        completed: !task.completed,
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
     } catch (error) {
       console.error('Error toggling task completion:', error);
       setTasks(prevTasks =>
@@ -185,17 +161,7 @@ export default function TasksPage() {
           sort_order: task.sort_order,
         }));
 
-        const response = await fetch('/api/tasks/reorder/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ task_orders: taskOrders }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        await tasksApi.reorder(taskOrders);
       } catch (error) {
         console.error('Error reordering tasks:', error);
         fetchTasks();
