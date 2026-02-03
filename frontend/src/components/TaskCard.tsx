@@ -14,76 +14,76 @@ interface TaskCardProps {
   onEditingChange?: (isEditing: boolean) => void;
 }
 
+// Define which Task fields are editable inline
+type EditableTaskFields = Pick<Task, 'title' | 'description' | 'priority'>;
+type EditingField = keyof EditableTaskFields | null;
+
 export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onTaskUpdate, onEditingChange }: TaskCardProps) {
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [isEditingDescription, setIsEditingDescription] = useState(false);
-  const [isEditingPriority, setIsEditingPriority] = useState(false);
-  const [editedTitle, setEditedTitle] = useState(task.title);
-  const [editedDescription, setEditedDescription] = useState(task.description);
-  const [editedPriority, setEditedPriority] = useState(task.priority);
+  const [editingField, setEditingField] = useState<EditingField>(null);
+  const [editedValues, setEditedValues] = useState<EditableTaskFields>({
+    title: task.title,
+    description: task.description,
+    priority: task.priority,
+  });
 
-  const titleInputRef = useRef<HTMLInputElement>(null);
-  const descriptionInputRef = useRef<HTMLTextAreaElement>(null);
-  const priorityRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (isEditingTitle && titleInputRef.current) {
-      titleInputRef.current.focus();
-      titleInputRef.current.select();
-    }
-  }, [isEditingTitle]);
+  const refs = {
+    title: useRef<HTMLInputElement>(null),
+    description: useRef<HTMLTextAreaElement>(null),
+    priority: useRef<HTMLDivElement>(null),
+  };
 
   useEffect(() => {
-    if (isEditingDescription && descriptionInputRef.current) {
-      descriptionInputRef.current.focus();
-      descriptionInputRef.current.select();
+    if (editingField === 'title' && refs.title.current) {
+      refs.title.current.focus();
+      refs.title.current.select();
+    } else if (editingField === 'description' && refs.description.current) {
+      refs.description.current.focus();
+      refs.description.current.select();
     }
-  }, [isEditingDescription]);
+  }, [editingField]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (priorityRef.current && !priorityRef.current.contains(event.target as Node)) {
-        setIsEditingPriority(false);
+      if (refs.priority.current && !refs.priority.current.contains(event.target as Node)) {
+        setEditingField(null);
       }
     };
 
-    if (isEditingPriority) {
+    if (editingField === 'priority') {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isEditingPriority]);
+  }, [editingField]);
 
   useEffect(() => {
-    const isEditing = isEditingTitle || isEditingDescription || isEditingPriority;
     if (onEditingChange) {
-      onEditingChange(isEditing);
+      onEditingChange(editingField !== null);
     }
-  }, [isEditingTitle, isEditingDescription, isEditingPriority, onEditingChange]);
+  }, [editingField, onEditingChange]);
 
   const handleTitleSave = async () => {
-    if (editedTitle.trim() && editedTitle !== task.title) {
-      await saveTask({ ...task, title: editedTitle });
+    if (editedValues.title.trim() && editedValues.title !== task.title) {
+      await saveTask({ ...task, title: editedValues.title });
     } else {
-      setEditedTitle(task.title);
+      setEditedValues(prev => ({ ...prev, title: task.title }));
     }
-    setIsEditingTitle(false);
+    setEditingField(null);
   };
 
   const handleDescriptionSave = async () => {
-    if (editedDescription.trim() && editedDescription !== task.description) {
-      await saveTask({ ...task, description: editedDescription });
+    if (editedValues.description.trim() && editedValues.description !== task.description) {
+      await saveTask({ ...task, description: editedValues.description });
     } else {
-      setEditedDescription(task.description);
+      setEditedValues(prev => ({ ...prev, description: task.description }));
     }
-    setIsEditingDescription(false);
+    setEditingField(null);
   };
 
   const handlePriorityChange = async (newPriority: string) => {
-    setEditedPriority(newPriority);
-    setIsEditingPriority(false);
+    setEditingField(null);
     if (newPriority !== task.priority) {
       await saveTask({ ...task, priority: newPriority });
     }
@@ -98,9 +98,11 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
       }
     } catch (error) {
       console.error('Error saving task:', error);
-      setEditedTitle(task.title);
-      setEditedDescription(task.description);
-      setEditedPriority(task.priority);
+      setEditedValues({
+        title: task.title,
+        description: task.description,
+        priority: task.priority,
+      });
     }
   };
 
@@ -115,41 +117,41 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
             className="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
           />
           <div className="flex-1">
-            {isEditingTitle ? (
+            {editingField === 'title' ? (
               <input
-                ref={titleInputRef}
+                ref={refs.title}
                 type="text"
-                value={editedTitle}
-                onChange={(e) => setEditedTitle(e.target.value)}
+                value={editedValues.title}
+                onChange={(e) => setEditedValues(prev => ({ ...prev, title: e.target.value }))}
                 onBlur={handleTitleSave}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleTitleSave();
                   if (e.key === 'Escape') {
-                    setEditedTitle(task.title);
-                    setIsEditingTitle(false);
+                    setEditedValues(prev => ({ ...prev, title: task.title }));
+                    setEditingField(null);
                   }
                 }}
                 className="text-xl font-semibold w-full border-2 border-blue-500 rounded px-2 py-1 focus:outline-none text-gray-900"
               />
             ) : (
               <h2
-                onDoubleClick={() => setIsEditingTitle(true)}
+                onDoubleClick={() => setEditingField('title')}
                 className={`text-xl font-semibold cursor-text ${task.completed ? 'text-gray-500 line-through' : 'text-gray-900'}`}
               >
                 {task.title}
               </h2>
             )}
 
-            {isEditingDescription ? (
+            {editingField === 'description' ? (
               <textarea
-                ref={descriptionInputRef}
-                value={editedDescription}
-                onChange={(e) => setEditedDescription(e.target.value)}
+                ref={refs.description}
+                value={editedValues.description}
+                onChange={(e) => setEditedValues(prev => ({ ...prev, description: e.target.value }))}
                 onBlur={handleDescriptionSave}
                 onKeyDown={(e) => {
                   if (e.key === 'Escape') {
-                    setEditedDescription(task.description);
-                    setIsEditingDescription(false);
+                    setEditedValues(prev => ({ ...prev, description: task.description }));
+                    setEditingField(null);
                   }
                 }}
                 className="text-gray-900 mt-2 w-full border-2 border-blue-500 rounded px-2 py-1 focus:outline-none resize-none"
@@ -157,7 +159,7 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
               />
             ) : (
               <p
-                onDoubleClick={() => setIsEditingDescription(true)}
+                onDoubleClick={() => setEditingField('description')}
                 className="text-gray-600 mt-2 cursor-text"
               >
                 {task.description}
@@ -165,9 +167,9 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
             )}
 
             <div className="flex items-center space-x-4 mt-4">
-              <div ref={priorityRef} className="relative">
+              <div ref={refs.priority} className="relative">
                 <span
-                  onDoubleClick={() => setIsEditingPriority(true)}
+                  onDoubleClick={() => setEditingField('priority')}
                   className={`px-3 py-1 rounded-full text-sm font-medium cursor-pointer ${
                     task.priority === 'high'
                       ? 'bg-red-100 text-red-800'
@@ -179,7 +181,7 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
                   {task.priority}
                 </span>
 
-                {isEditingPriority && (
+                {editingField === 'priority' && (
                   <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-10 min-w-[120px]">
                     <button
                       onClick={() => handlePriorityChange('low')}
