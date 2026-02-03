@@ -1,10 +1,9 @@
 name: Run Tests
 
+# Run tests on all pushes and pull requests
 on:
   push:
-    branches: [ main, develop ]
   pull_request:
-    branches: [ main, develop ]
 
 jobs:
   frontend-tests:
