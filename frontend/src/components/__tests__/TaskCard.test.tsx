@@ -1,9 +1,17 @@
 import { render, screen, fireEvent, waitFor } from '@/test-utils'
 import TaskCard from '../TaskCard'
 import { Task } from '@/types/task'
+import { tasksApi } from '@/lib/api'
 
 // Mock fetch globally
 global.fetch = jest.fn()
+
+// Mock the API layer
+jest.mock('@/lib/api', () => ({
+  tasksApi: {
+    update: jest.fn(),
+  },
+}))
 
 const mockTask: Task = {
   id: 1,
@@ -157,10 +165,9 @@ describe('TaskCard', () => {
     const mockOnToggleComplete = jest.fn()
     const mockOnTaskUpdate = jest.fn()
 
-    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ ...mockTask, title: 'Updated Title' }),
-    })
+    // Mock successful API update
+    const mockUpdate = tasksApi.update as jest.Mock
+    mockUpdate.mockResolvedValueOnce({ ...mockTask, title: 'Updated Title' })
 
     render(
       <TaskCard
@@ -180,14 +187,55 @@ describe('TaskCard', () => {
     fireEvent.blur(input)
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        `/api/tasks/${mockTask.id}/`,
-        expect.objectContaining({
-          method: 'PUT',
-          body: expect.stringContaining('Updated Title'),
-        })
-      )
+      expect(mockUpdate).toHaveBeenCalledWith(mockTask.id, {
+        ...mockTask,
+        title: 'Updated Title',
+      })
     })
+  })
+
+  it('calls onTaskUpdate with updated task data after successful inline edit', async () => {
+    const mockOnEdit = jest.fn()
+    const mockOnDelete = jest.fn()
+    const mockOnToggleComplete = jest.fn()
+    const mockOnTaskUpdate = jest.fn()
+
+    // Mock successful API update
+    const mockUpdate = tasksApi.update as jest.Mock
+    mockUpdate.mockResolvedValueOnce({ ...mockTask, title: 'Updated Title' })
+
+    render(
+      <TaskCard
+        task={mockTask}
+        onEdit={mockOnEdit}
+        onDelete={mockOnDelete}
+        onToggleComplete={mockOnToggleComplete}
+        onTaskUpdate={mockOnTaskUpdate}
+      />
+    )
+
+    const title = screen.getByText('Test Task')
+    fireEvent.doubleClick(title)
+
+    const input = screen.getByDisplayValue('Test Task')
+    fireEvent.change(input, { target: { value: 'Updated Title' } })
+    fireEvent.blur(input)
+
+    await waitFor(() => {
+      expect(mockOnTaskUpdate).toHaveBeenCalledWith({
+        ...mockTask,
+        title: 'Updated Title',
+      })
+    })
+
+    // Verify the API was called with correct data
+    expect(mockUpdate).toHaveBeenCalledWith(mockTask.id, {
+      ...mockTask,
+      title: 'Updated Title',
+    })
+
+    // Verify onEdit modal was NOT called (inline edit shouldn't trigger modal)
+    expect(mockOnEdit).not.toHaveBeenCalled()
   })
 
   it('displays completed task with strikethrough', () => {
