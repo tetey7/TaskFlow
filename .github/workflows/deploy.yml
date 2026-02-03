@@ -1,0 +1,70 @@
+name: Deploy to Production
+
+# This workflow runs tests before allowing Vercel/Railway to auto-deploy
+# Only runs when code is merged to main, not on PRs
+# Use test.yml for PR checks instead
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  # Run all tests first
+  test-before-deploy:
+    name: Test Before Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Frontend tests
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run frontend tests
+        working-directory: ./frontend
+        run: npm test
+
+      # Backend tests
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run backend tests
+        working-directory: ./backend
+        env:
+          SECRET_KEY: test-secret-key
+          DEBUG: True
+        run: pytest
+
+      - name: All tests passed
+        run: echo "✅ All tests passed! Vercel and Railway will auto-deploy."
+
+  # Optional: Add deployment status check
+  deployment-ready:
+    name: Ready for Deployment
+    needs: test-before-deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deployment notification
+        run: |
+          echo "🚀 Tests passed on main branch"
+          echo "📦 Vercel will deploy frontend automatically"
+          echo "📦 Railway will deploy backend automatically"
