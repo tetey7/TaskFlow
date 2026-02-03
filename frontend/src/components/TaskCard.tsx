@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import clsx from 'clsx';
 import { Task } from '@/types/task';
 import { tasksApi } from '@/lib/api';
 import { EditIcon, DeleteIcon } from './icons';
@@ -170,13 +171,14 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
               <div ref={refs.priority} className="relative">
                 <span
                   onDoubleClick={() => setEditingField('priority')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium cursor-pointer ${
-                    task.priority === 'high'
-                      ? 'bg-red-100 text-red-800'
-                      : task.priority === 'medium'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-green-100 text-green-800'
-                  }`}
+                  className={clsx(
+                    'px-3 py-1 rounded-full text-sm font-medium cursor-pointer',
+                    {
+                      'bg-red-100 text-red-800': task.priority === 'high',
+                      'bg-yellow-100 text-yellow-800': task.priority === 'medium',
+                      'bg-green-100 text-green-800': task.priority === 'low',
+                    }
+                  )}
                 >
                   {task.priority}
                 </span>
