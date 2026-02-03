@@ -11,9 +11,10 @@ interface TaskCardProps {
   onDelete: (task: Task) => void;
   onToggleComplete: (task: Task) => void;
   onTaskUpdate?: (task: Task) => void;
+  onEditingChange?: (isEditing: boolean) => void;
 }
 
-export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onTaskUpdate }: TaskCardProps) {
+export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onTaskUpdate, onEditingChange }: TaskCardProps) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [isEditingPriority, setIsEditingPriority] = useState(false);
@@ -54,6 +55,13 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isEditingPriority]);
+
+  useEffect(() => {
+    const isEditing = isEditingTitle || isEditingDescription || isEditingPriority;
+    if (onEditingChange) {
+      onEditingChange(isEditing);
+    }
+  }, [isEditingTitle, isEditingDescription, isEditingPriority, onEditingChange]);
 
   const handleTitleSave = async () => {
     if (editedTitle.trim() && editedTitle !== task.title) {

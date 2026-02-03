@@ -21,6 +21,8 @@ interface SortableTaskCardProps {
 }
 
 function SortableTaskCard({ task, onEdit, onDelete, onToggleComplete, onTaskUpdate }: SortableTaskCardProps) {
+  const [isEditing, setIsEditing] = useState(false);
+
   const {
     attributes,
     listeners,
@@ -28,23 +30,27 @@ function SortableTaskCard({ task, onEdit, onDelete, onToggleComplete, onTaskUpda
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: task.id });
+  } = useSortable({
+    id: task.id,
+    disabled: isEditing,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    cursor: 'grab',
+    cursor: isEditing ? 'default' : 'grab',
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...attributes} {...(!isEditing && listeners)}>
       <TaskCard
         task={task}
         onEdit={onEdit}
         onDelete={onDelete}
         onToggleComplete={onToggleComplete}
         onTaskUpdate={onTaskUpdate}
+        onEditingChange={setIsEditing}
       />
     </div>
   );
