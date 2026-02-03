@@ -1,3 +1,5 @@
+"""Django settings for TaskFlow project."""
+
 import os
 import sys
 from pathlib import Path
