@@ -3,6 +3,11 @@ from django.db import models
 
 
 class Task(models.Model):
+    """
+    Model representing a task with title, description, priority,
+    and completion status.
+    """
+
     PRIORITY_CHOICES = [
         ("low", "Low"),
         ("medium", "Medium"),
