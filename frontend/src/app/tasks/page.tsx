@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useState } from 'react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import Header from '@/components/Header';
@@ -10,7 +10,7 @@ import TaskFormModal from '@/components/TaskFormModal';
 import DeleteTaskModal from '@/components/DeleteTaskModal';
 import TaskCard from '@/components/TaskCard';
 import { Task } from '@/types/task';
-import { tasksApi } from '@/lib/api';
+import { useTasks } from '@/hooks/useTasks';
 
 interface SortableTaskCardProps {
   task: Task;
@@ -51,8 +51,7 @@ function SortableTaskCard({ task, onEdit, onDelete, onToggleComplete, onTaskUpda
 }
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { tasks, loading, fetchTasks, updateTask, toggleComplete, handleDragEnd } = useTasks();
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -75,22 +74,6 @@ export default function TasksPage() {
     })
   );
 
-  const fetchTasks = async () => {
-    setLoading(true);
-    try {
-      const data = await tasksApi.getAll();
-      setTasks(data);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
   const handleNewTask = () => {
@@ -108,65 +91,6 @@ export default function TasksPage() {
   const handleDeleteTask = (task: Task) => {
     setSelectedTask(task);
     setIsDeleteModalOpen(true);
-  };
-
-  const handleToggleComplete = async (task: Task) => {
-    setTasks(prevTasks =>
-      prevTasks.map(t =>
-        t.id === task.id ? { ...t, completed: !t.completed } : t
-      )
-    );
-
-    try {
-      await tasksApi.update(task.id, {
-        ...task,
-        completed: !task.completed,
-      });
-    } catch (error) {
-      console.error('Error toggling task completion:', error);
-      setTasks(prevTasks =>
-        prevTasks.map(t =>
-          t.id === task.id ? { ...t, completed: task.completed } : t
-        )
-      );
-    }
-  };
-
-  const handleTaskUpdate = (updatedTask: Task) => {
-    setTasks(prevTasks =>
-      prevTasks.map(t =>
-        t.id === updatedTask.id ? updatedTask : t
-      )
-    );
-  };
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      const oldIndex = tasks.findIndex((task) => task.id === active.id);
-      const newIndex = tasks.findIndex((task) => task.id === over.id);
-
-      const newTasks = arrayMove(tasks, oldIndex, newIndex);
-      const updatedTasks = newTasks.map((task, index) => ({
-        ...task,
-        sort_order: index,
-      }));
-
-      setTasks(updatedTasks);
-
-      try {
-        const taskOrders = updatedTasks.map((task) => ({
-          id: task.id,
-          sort_order: task.sort_order,
-        }));
-
-        await tasksApi.reorder(taskOrders);
-      } catch (error) {
-        console.error('Error reordering tasks:', error);
-        fetchTasks();
-      }
-    }
   };
 
   return (
@@ -217,8 +141,8 @@ export default function TasksPage() {
                     task={task}
                     onEdit={handleEditTask}
                     onDelete={handleDeleteTask}
-                    onToggleComplete={handleToggleComplete}
-                    onTaskUpdate={handleTaskUpdate}
+                    onToggleComplete={toggleComplete}
+                    onTaskUpdate={updateTask}
                   />
                 ))}
               </div>
