@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { tasksApi } from '@/lib/api';
-import { CloseIcon } from './icons';
+import Modal from './Modal';
 
 interface Task {
   id?: number;
@@ -76,32 +76,19 @@ export default function TaskFormModal({ isOpen, onClose, onSuccess, task, mode }
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {mode === 'edit' ? 'Edit Task' : 'Create New Task'}
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
-              disabled={isSubmitting}
-            >
-              <CloseIcon />
-            </button>
-          </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={mode === 'edit' ? 'Edit Task' : 'Create New Task'}
+    >
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
+      )}
 
-          {error && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
                 <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
@@ -185,8 +172,6 @@ export default function TaskFormModal({ isOpen, onClose, onSuccess, task, mode }
               </button>
             </div>
           </form>
-        </div>
-      </div>
-    </div>
+    </Modal>
   );
 }
