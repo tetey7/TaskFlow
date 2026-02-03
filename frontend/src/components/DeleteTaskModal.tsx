@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { tasksApi } from '@/lib/api';
 import { CloseIcon } from './icons';
 
 interface DeleteTaskModalProps {
@@ -22,14 +23,7 @@ export default function DeleteTaskModal({ isOpen, onClose, onSuccess, taskId, ta
     setIsDeleting(true);
 
     try {
-      const response = await fetch(`/api/tasks/${taskId}/`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
+      await tasksApi.delete(taskId);
       onSuccess();
       onClose();
     } catch (err) {
