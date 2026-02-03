@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import clsx from 'clsx';
 import { Task } from '@/types/task';
 import { tasksApi } from '@/lib/api';
 import { EditIcon, DeleteIcon } from './icons';
+import { cn } from '@/lib/utils';
 
 interface TaskCardProps {
   task: Task;
@@ -18,6 +18,16 @@ interface TaskCardProps {
 // Define which Task fields are editable inline
 type EditableTaskFields = Pick<Task, 'title' | 'description' | 'priority'>;
 type EditingField = keyof EditableTaskFields | null;
+
+// Shared styles for editing inputs
+const EDIT_STYLES = {
+  input: 'text-xl font-semibold w-full border-2 border-blue-500 rounded px-2 py-1 focus:outline-none text-gray-900',
+  textarea: 'text-gray-900 mt-2 w-full border-2 border-blue-500 rounded px-2 py-1 focus:outline-none resize-none',
+  title: 'text-xl font-semibold cursor-text',
+  description: 'text-gray-600 mt-2 cursor-text',
+  priorityButton: 'w-full text-left px-4 py-2 text-sm font-medium',
+  actionButton: 'p-2 text-gray-600 rounded-md transition-colors',
+} as const;
 
 export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onTaskUpdate, onEditingChange }: TaskCardProps) {
   const [editingField, setEditingField] = useState<EditingField>(null);
@@ -65,20 +75,23 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
     }
   }, [editingField, onEditingChange]);
 
-  const handleTitleSave = async () => {
-    if (editedValues.title.trim() && editedValues.title !== task.title) {
-      await saveTask({ ...task, title: editedValues.title });
-    } else {
-      setEditedValues(prev => ({ ...prev, title: task.title }));
-    }
+  const updateField = (field: keyof EditableTaskFields, value: string) => {
+    setEditedValues(prev => ({ ...prev, [field]: value }));
+  };
+
+  const cancelEdit = (field: keyof EditableTaskFields) => {
+    setEditedValues(prev => ({ ...prev, [field]: task[field] }));
     setEditingField(null);
   };
 
-  const handleDescriptionSave = async () => {
-    if (editedValues.description.trim() && editedValues.description !== task.description) {
-      await saveTask({ ...task, description: editedValues.description });
+  const saveField = async (field: keyof EditableTaskFields) => {
+    const value = editedValues[field];
+    const originalValue = task[field];
+
+    if (value.trim() && value !== originalValue) {
+      await saveTask({ ...task, [field]: value });
     } else {
-      setEditedValues(prev => ({ ...prev, description: task.description }));
+      setEditedValues(prev => ({ ...prev, [field]: originalValue }));
     }
     setEditingField(null);
   };
@@ -123,21 +136,21 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
                 ref={refs.title}
                 type="text"
                 value={editedValues.title}
-                onChange={(e) => setEditedValues(prev => ({ ...prev, title: e.target.value }))}
-                onBlur={handleTitleSave}
+                onChange={(e) => updateField('title', e.target.value)}
+                onBlur={() => saveField('title')}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleTitleSave();
-                  if (e.key === 'Escape') {
-                    setEditedValues(prev => ({ ...prev, title: task.title }));
-                    setEditingField(null);
-                  }
+                  if (e.key === 'Enter') saveField('title');
+                  if (e.key === 'Escape') cancelEdit('title');
                 }}
-                className="text-xl font-semibold w-full border-2 border-blue-500 rounded px-2 py-1 focus:outline-none text-gray-900"
+                className={EDIT_STYLES.input}
               />
             ) : (
               <h2
                 onDoubleClick={() => setEditingField('title')}
-                className={`text-xl font-semibold cursor-text ${task.completed ? 'text-gray-500 line-through' : 'text-gray-900'}`}
+                className={cn(EDIT_STYLES.title, {
+                  'text-gray-500 line-through': task.completed,
+                  'text-gray-900': !task.completed,
+                })}
               >
                 {task.title}
               </h2>
@@ -147,21 +160,18 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
               <textarea
                 ref={refs.description}
                 value={editedValues.description}
-                onChange={(e) => setEditedValues(prev => ({ ...prev, description: e.target.value }))}
-                onBlur={handleDescriptionSave}
+                onChange={(e) => updateField('description', e.target.value)}
+                onBlur={() => saveField('description')}
                 onKeyDown={(e) => {
-                  if (e.key === 'Escape') {
-                    setEditedValues(prev => ({ ...prev, description: task.description }));
-                    setEditingField(null);
-                  }
+                  if (e.key === 'Escape') cancelEdit('description');
                 }}
-                className="text-gray-900 mt-2 w-full border-2 border-blue-500 rounded px-2 py-1 focus:outline-none resize-none"
+                className={EDIT_STYLES.textarea}
                 rows={3}
               />
             ) : (
               <p
                 onDoubleClick={() => setEditingField('description')}
-                className="text-gray-600 mt-2 cursor-text"
+                className={EDIT_STYLES.description}
               >
                 {task.description}
               </p>
@@ -171,7 +181,7 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
               <div ref={refs.priority} className="relative">
                 <span
                   onDoubleClick={() => setEditingField('priority')}
-                  className={clsx(
+                  className={cn(
                     'px-3 py-1 rounded-full text-sm font-medium cursor-pointer',
                     {
                       'bg-red-100 text-red-800': task.priority === 'high',
@@ -187,19 +197,19 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
                   <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-10 min-w-[120px]">
                     <button
                       onClick={() => handlePriorityChange('low')}
-                      className="w-full text-left px-4 py-2 hover:bg-green-50 text-sm text-green-800 font-medium"
+                      className={cn(EDIT_STYLES.priorityButton, 'hover:bg-green-50 text-green-800')}
                     >
                       Low
                     </button>
                     <button
                       onClick={() => handlePriorityChange('medium')}
-                      className="w-full text-left px-4 py-2 hover:bg-yellow-50 text-sm text-yellow-800 font-medium"
+                      className={cn(EDIT_STYLES.priorityButton, 'hover:bg-yellow-50 text-yellow-800')}
                     >
                       Medium
                     </button>
                     <button
                       onClick={() => handlePriorityChange('high')}
-                      className="w-full text-left px-4 py-2 hover:bg-red-50 text-sm text-red-800 font-medium"
+                      className={cn(EDIT_STYLES.priorityButton, 'hover:bg-red-50 text-red-800')}
                     >
                       High
                     </button>
@@ -207,9 +217,10 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
                 )}
               </div>
               <span
-                className={`text-sm ${
-                  task.completed ? 'text-green-600' : 'text-gray-500'
-                }`}
+                className={cn('text-sm', {
+                  'text-green-600': task.completed,
+                  'text-gray-500': !task.completed,
+                })}
               >
                 {task.completed ? '✓ Completed' : 'In Progress'}
               </span>
@@ -219,14 +230,14 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
         <div className="flex items-center space-x-2 ml-4">
           <button
             onClick={() => onEdit(task)}
-            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+            className={cn(EDIT_STYLES.actionButton, 'hover:text-blue-600 hover:bg-blue-50')}
             title="Edit task"
           >
             <EditIcon />
           </button>
           <button
             onClick={() => onDelete(task)}
-            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+            className={cn(EDIT_STYLES.actionButton, 'hover:text-red-600 hover:bg-red-50')}
             title="Delete task"
           >
             <DeleteIcon />
