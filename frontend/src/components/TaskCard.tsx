@@ -1,16 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { Task } from '@/types/task';
+import { tasksApi } from '@/lib/api';
 import { EditIcon, DeleteIcon } from './icons';
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  priority: string;
-  completed: boolean;
-  sort_order: number;
-}
 
 interface TaskCardProps {
   task: Task;
@@ -90,17 +83,7 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
 
   const saveTask = async (updatedTask: Task) => {
     try {
-      const response = await fetch(`/api/tasks/${task.id}/`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedTask),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      await tasksApi.update(task.id, updatedTask);
 
       if (onTaskUpdate) {
         onTaskUpdate(updatedTask);

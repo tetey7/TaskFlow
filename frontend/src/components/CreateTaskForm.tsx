@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { tasksApi } from '@/lib/api';
 
 interface CreateTaskFormProps {
   isOpen: boolean;
@@ -21,22 +22,12 @@ export default function CreateTaskForm({ isOpen, onClose, onTaskCreated }: Creat
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/tasks/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title,
-          description,
-          priority,
-          completed: false,
-        }),
+      await tasksApi.create({
+        title,
+        description,
+        priority,
+        completed: false,
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
 
       setTitle('');
       setDescription('');
