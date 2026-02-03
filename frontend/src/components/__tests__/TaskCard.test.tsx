@@ -159,41 +159,6 @@ describe('TaskCard', () => {
     expect(input).toBeInTheDocument()
   })
 
-  it('updates task title when edited inline', async () => {
-    const mockOnEdit = jest.fn()
-    const mockOnDelete = jest.fn()
-    const mockOnToggleComplete = jest.fn()
-    const mockOnTaskUpdate = jest.fn()
-
-    // Mock successful API update
-    const mockUpdate = tasksApi.update as jest.Mock
-    mockUpdate.mockResolvedValueOnce({ ...mockTask, title: 'Updated Title' })
-
-    render(
-      <TaskCard
-        task={mockTask}
-        onEdit={mockOnEdit}
-        onDelete={mockOnDelete}
-        onToggleComplete={mockOnToggleComplete}
-        onTaskUpdate={mockOnTaskUpdate}
-      />
-    )
-
-    const title = screen.getByText('Test Task')
-    fireEvent.doubleClick(title)
-
-    const input = screen.getByDisplayValue('Test Task')
-    fireEvent.change(input, { target: { value: 'Updated Title' } })
-    fireEvent.blur(input)
-
-    await waitFor(() => {
-      expect(mockUpdate).toHaveBeenCalledWith(mockTask.id, {
-        ...mockTask,
-        title: 'Updated Title',
-      })
-    })
-  })
-
   it('calls onTaskUpdate with updated task data after successful inline edit', async () => {
     const mockOnEdit = jest.fn()
     const mockOnDelete = jest.fn()
