@@ -37,7 +37,7 @@ describe('DeleteTaskModal', () => {
       />
     );
 
-    expect(screen.getByText('Delete Task')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /delete task/i })).toBeInTheDocument();
     expect(screen.getByText(/Are you sure you want to delete/)).toBeInTheDocument();
     expect(screen.getByText('"Test Task"')).toBeInTheDocument();
   });
@@ -53,7 +53,7 @@ describe('DeleteTaskModal', () => {
       />
     );
 
-    fireEvent.click(screen.getByText('Cancel'));
+    fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
@@ -71,7 +71,7 @@ describe('DeleteTaskModal', () => {
       />
     );
 
-    fireEvent.click(screen.getByText('Delete Task'));
+    fireEvent.click(screen.getByRole('button', { name: /delete task/i }));
 
     await waitFor(() => {
       expect(mockDelete).toHaveBeenCalledWith(1);
@@ -94,7 +94,7 @@ describe('DeleteTaskModal', () => {
       />
     );
 
-    fireEvent.click(screen.getByText('Delete Task'));
+    fireEvent.click(screen.getByRole('button', { name: /delete task/i }));
 
     await waitFor(() => {
       expect(mockDelete).not.toHaveBeenCalled();
@@ -117,7 +117,7 @@ describe('DeleteTaskModal', () => {
       />
     );
 
-    const deleteButton = screen.getByText('Delete Task');
+    const deleteButton = screen.getByRole('button', { name: /delete task/i });
     fireEvent.click(deleteButton);
 
     expect(deleteButton).toBeDisabled();
