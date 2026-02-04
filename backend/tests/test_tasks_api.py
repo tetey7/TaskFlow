@@ -85,3 +85,88 @@ class TestTaskAPI:
 
         assert response.status_code == 204
         assert Task.objects.count() == 0
+
+    def test_reorder_tasks(self, api_client):
+        """Test reordering tasks."""
+        # Create multiple tasks
+        task1 = Task.objects.create(title="Task 1", sort_order=0)
+        task2 = Task.objects.create(title="Task 2", sort_order=1)
+        task3 = Task.objects.create(title="Task 3", sort_order=2)
+
+        url = reverse("tasks-reorder")
+        data = {
+            "task_orders": [
+                {"id": task3.id, "sort_order": 0},
+                {"id": task1.id, "sort_order": 1},
+                {"id": task2.id, "sort_order": 2},
+            ]
+        }
+        response = api_client.post(url, data, format="json")
+
+        assert response.status_code == 200
+        assert response.data == {"status": "success"}
+
+        # Verify the order was updated in the database
+        task1.refresh_from_db()
+        task2.refresh_from_db()
+        task3.refresh_from_db()
+
+        assert task1.sort_order == 1
+        assert task2.sort_order == 2
+        assert task3.sort_order == 0
+
+    def test_reorder_tasks_empty_list(self, api_client):
+        """Test reordering with empty list."""
+        url = reverse("tasks-reorder")
+        response = api_client.post(url, {"task_orders": []}, format="json")
+
+        assert response.status_code == 200
+        assert response.data == {"status": "success"}
+
+    def test_reorder_tasks_missing_field(self, api_client):
+        """Test reordering with missing task_orders field."""
+        task1 = Task.objects.create(title="Task 1", sort_order=0)
+
+        url = reverse("tasks-reorder")
+        response = api_client.post(url, {}, format="json")
+
+        assert response.status_code == 200
+        # Should not crash, just do nothing
+        task1.refresh_from_db()
+        assert task1.sort_order == 0
+
+    def test_reorder_tasks_partial_data(self, api_client):
+        """Test reordering with incomplete data (missing id or sort_order)."""
+        task1 = Task.objects.create(title="Task 1", sort_order=0)
+
+        url = reverse("tasks-reorder")
+        data = {
+            "task_orders": [
+                {"id": task1.id},  # Missing sort_order
+                {"sort_order": 5},  # Missing id
+            ]
+        }
+        response = api_client.post(url, data, format="json")
+
+        assert response.status_code == 200
+        # Should not update tasks with incomplete data
+        task1.refresh_from_db()
+        assert task1.sort_order == 0
+
+    def test_reorder_tasks_nonexistent_task(self, api_client):
+        """Test reordering with non-existent task ID."""
+        task1 = Task.objects.create(title="Task 1", sort_order=0)
+
+        url = reverse("tasks-reorder")
+        data = {
+            "task_orders": [
+                {"id": 99999, "sort_order": 0},  # Non-existent ID
+                {"id": task1.id, "sort_order": 1},
+            ]
+        }
+        response = api_client.post(url, data, format="json")
+
+        assert response.status_code == 200
+        # Should update existing task, ignore non-existent
+        task1.refresh_from_db()
+        assert task1.sort_order == 1
