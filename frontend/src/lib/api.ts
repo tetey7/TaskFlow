@@ -60,7 +60,7 @@ export const tasksApi = {
    */
   update: async (id: number, task: Partial<Task>): Promise<Task> => {
     const response = await fetch(`${API_BASE}/tasks/${id}/`, {
-      method: 'PUT',
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
