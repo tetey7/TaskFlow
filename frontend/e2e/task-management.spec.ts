@@ -245,7 +245,7 @@ test.describe('API Integration', () => {
 
   test('should create task via API and verify in UI', async ({ request, page }) => {
     // Create task via API
-    const response = await request.post('http://localhost:8000/api/tasks/', {
+    const response = await request.post('http://localhost:8000/api/tasks', {
       data: {
         title: 'API Created Task',
         description: 'Created directly via API',

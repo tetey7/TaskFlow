@@ -35,7 +35,7 @@ export const tasksApi = {
    * Fetch all tasks
    */
   getAll: async (): Promise<Task[]> => {
-    const response = await fetch(`${API_BASE}/tasks/`);
+    const response = await fetch(`${API_BASE}/tasks`);
     return handleResponse<Task[]>(response);
   },
 
@@ -45,7 +45,7 @@ export const tasksApi = {
   create: async (
     task: Omit<Task, 'id' | 'created_at' | 'sort_order'>
   ): Promise<Task> => {
-    const response = await fetch(`${API_BASE}/tasks/`, {
+    const response = await fetch(`${API_BASE}/tasks`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ export const tasksApi = {
    * Update an existing task
    */
   update: async (id: number, task: Partial<Task>): Promise<Task> => {
-    const response = await fetch(`${API_BASE}/tasks/${id}/`, {
+    const response = await fetch(`${API_BASE}/tasks/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ export const tasksApi = {
    * Delete a task
    */
   delete: async (id: number): Promise<void> => {
-    const response = await fetch(`${API_BASE}/tasks/${id}/`, {
+    const response = await fetch(`${API_BASE}/tasks/${id}`, {
       method: 'DELETE',
     });
     return handleResponse<void>(response);
@@ -85,7 +85,7 @@ export const tasksApi = {
   reorder: async (
     tasks: Array<{ id: number; sort_order: number }>
   ): Promise<void> => {
-    const response = await fetch(`${API_BASE}/tasks/reorder/`, {
+    const response = await fetch(`${API_BASE}/tasks/reorder`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
