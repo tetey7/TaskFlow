@@ -97,6 +97,9 @@ REST_FRAMEWORK = {
 
 ROOT_URLCONF = "config.urls"
 
+# Disable trailing slash redirects to work with Next.js
+APPEND_SLASH = False
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",

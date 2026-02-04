@@ -2,18 +2,16 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://backend:8000';
+    // In Docker: use service name 'backend'
+    // In CI/Local: use localhost
+    // Check if we're in Docker by looking for HOSTNAME env var (Docker sets this)
+    const isDocker = !!process.env.HOSTNAME;
+    const backendUrl = isDocker ? 'http://backend:8000' : 'http://localhost:8000';
 
     return [
-      // Match with trailing slash first (higher priority)
-      {
-        source: '/api/:path*/',
-        destination: `${backendUrl}/api/:path*/`,
-      },
-      // Match without trailing slash and add it
       {
         source: '/api/:path*',
-        destination: `${backendUrl}/api/:path*/`,
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },
