@@ -55,7 +55,7 @@ describe('TaskCard', () => {
     const mockOnToggleComplete = jest.fn()
     const mockOnTaskUpdate = jest.fn()
 
-    const { container } = render(
+    render(
       <TaskCard
         task={mockTask}
         onEdit={mockOnEdit}

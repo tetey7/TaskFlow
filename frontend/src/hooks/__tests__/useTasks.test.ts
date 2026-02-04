@@ -1,4 +1,5 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
+import { DragEndEvent } from '@dnd-kit/core';
 import { useTasks } from '../useTasks';
 import { tasksApi } from '@/lib/api';
 
@@ -114,13 +115,11 @@ describe('useTasks', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    const reorderedTasks = [
-      { id: 2, sort_order: 0 },
-      { id: 1, sort_order: 1 },
-    ];
-
     await act(async () => {
-      await result.current.handleDragEnd({ active: { id: '2' }, over: { id: '1' } } as any);
+      await result.current.handleDragEnd({
+        active: { id: '2' },
+        over: { id: '1' }
+      } as unknown as DragEndEvent);
     });
 
     expect(tasksApi.reorder).toHaveBeenCalled();
@@ -137,13 +136,11 @@ describe('useTasks', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    const reorderedTasks = [
-      { id: 2, sort_order: 0 },
-      { id: 1, sort_order: 1 },
-    ];
-
     await act(async () => {
-      await result.current.handleDragEnd({ active: { id: '2' }, over: { id: '1' } } as any);
+      await result.current.handleDragEnd({
+        active: { id: '2' },
+        over: { id: '1' }
+      } as unknown as DragEndEvent);
     });
 
     expect(consoleError).toHaveBeenCalled();

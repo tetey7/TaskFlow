@@ -5,7 +5,7 @@ import { Task } from '@/types/task';
 import { tasksApi } from '@/lib/api';
 import { EditIcon, DeleteIcon } from './ui/icons';
 import { cn } from '@/lib/utils';
-import { PRIORITIES, PRIORITY_COLORS, PRIORITY_HOVER_COLORS, PRIORITY_OPTIONS } from '@/constants/priorities';
+import { PRIORITY_COLORS, PRIORITY_HOVER_COLORS, PRIORITY_OPTIONS } from '@/constants/priorities';
 
 interface TaskCardProps {
   task: Task;

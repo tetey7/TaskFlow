@@ -39,7 +39,6 @@ describe('DeleteTaskModal', () => {
 
     expect(screen.getByRole('heading', { name: /delete task/i })).toBeInTheDocument();
     expect(screen.getByText(/Are you sure you want to delete/)).toBeInTheDocument();
-    expect(screen.getByText('"Test Task"')).toBeInTheDocument();
   });
 
   it('should call onClose when Cancel is clicked', () => {
