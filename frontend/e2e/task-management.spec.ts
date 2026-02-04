@@ -85,6 +85,7 @@ test.describe('Task Management E2E', () => {
     for (const taskTitle of tasks) {
       await page.click('button:has-text("New Task")');
       await page.fill('input#title', taskTitle);
+      await page.fill('textarea#description', `Description for ${taskTitle}`);
       await page.click('button[type="submit"]:has-text("Create Task")');
       await page.waitForLoadState('networkidle');
       await page.waitForSelector(`text=${taskTitle}`, { timeout: 10000 });
@@ -125,6 +126,7 @@ test.describe('Task Management E2E', () => {
     for (const task of taskData) {
       await page.click('button:has-text("New Task")');
       await page.fill('input#title', task.title);
+      await page.fill('textarea#description', `Description for ${task.title}`);
       await page.selectOption('select#priority', task.priority);
       await page.click('button[type="submit"]:has-text("Create Task")');
       await page.waitForLoadState('networkidle');
@@ -158,6 +160,7 @@ test.describe('Task Management E2E', () => {
     // Create a task
     await page.click('button:has-text("New Task")');
     await page.fill('input#title', 'Persistent Task');
+    await page.fill('textarea#description', 'Testing data persistence');
     await page.click('button[type="submit"]:has-text("Create Task")');
     await page.waitForLoadState('networkidle');
     await page.waitForSelector('text=Persistent Task', { timeout: 10000 });
@@ -174,6 +177,7 @@ test.describe('Task Management E2E', () => {
     // Create a task
     await page.click('button:has-text("New Task")');
     await page.fill('input#title', 'Inline Edit Test');
+    await page.fill('textarea#description', 'Testing inline editing');
     await page.click('button[type="submit"]:has-text("Create Task")');
     await page.waitForLoadState('networkidle');
     await page.waitForSelector('text=Inline Edit Test', { timeout: 10000 });
@@ -196,6 +200,7 @@ test.describe('Task Management E2E', () => {
     // Create a task
     await page.click('button:has-text("New Task")');
     await page.fill('input#title', 'Concurrent Test');
+    await page.fill('textarea#description', 'Testing concurrent operations');
     await page.click('button[type="submit"]:has-text("Create Task")');
     await page.waitForLoadState('networkidle');
     await page.waitForSelector('text=Concurrent Test', { timeout: 10000 });
