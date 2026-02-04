@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { tasksApi } from '@/lib/api';
-import AlertModal from './AlertModal';
+import AlertModal from './ui/AlertModal';
 
 interface DeleteTaskModalProps {
   isOpen: boolean;
