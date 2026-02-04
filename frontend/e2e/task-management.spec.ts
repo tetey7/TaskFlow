@@ -13,8 +13,8 @@ test.describe('Task Management E2E', () => {
   });
 
   test('should create a new task through UI', async ({ page }) => {
-    // Click "Add Task" button
-    await page.click('button:has-text("Add Task")');
+    // Click "New Task" button
+    await page.click('button:has-text("New Task")');
 
     // Fill in the form
     await page.fill('input[name="title"]', 'E2E Test Task');
@@ -38,7 +38,7 @@ test.describe('Task Management E2E', () => {
 
   test('should complete full CRUD workflow', async ({ page }) => {
     // 1. CREATE
-    await page.click('button:has-text("Add Task")');
+    await page.click('button:has-text("New Task")');
     await page.fill('input[name="title"]', 'CRUD Test Task');
     await page.fill('textarea[name="description"]', 'Testing CRUD operations');
     await page.click('button[type="submit"]:has-text("Create")');
@@ -79,7 +79,7 @@ test.describe('Task Management E2E', () => {
     const tasks = ['First Task', 'Second Task', 'Third Task'];
 
     for (const taskTitle of tasks) {
-      await page.click('button:has-text("Add Task")');
+      await page.click('button:has-text("New Task")');
       await page.fill('input[name="title"]', taskTitle);
       await page.click('button[type="submit"]:has-text("Create")');
       await page.waitForSelector(`text=${taskTitle}`);
@@ -118,7 +118,7 @@ test.describe('Task Management E2E', () => {
     ];
 
     for (const task of taskData) {
-      await page.click('button:has-text("Add Task")');
+      await page.click('button:has-text("New Task")');
       await page.fill('input[name="title"]', task.title);
       await page.selectOption('select[name="priority"]', task.priority);
       await page.click('button[type="submit"]:has-text("Create")');
@@ -138,7 +138,7 @@ test.describe('Task Management E2E', () => {
 
   test('should handle API errors gracefully', async ({ page }) => {
     // Try to create task with empty title (should fail validation)
-    await page.click('button:has-text("Add Task")');
+    await page.click('button:has-text("New Task")');
     await page.fill('input[name="title"]', '');
     await page.click('button[type="submit"]:has-text("Create")');
 
@@ -150,7 +150,7 @@ test.describe('Task Management E2E', () => {
 
   test('should persist data after page reload', async ({ page }) => {
     // Create a task
-    await page.click('button:has-text("Add Task")');
+    await page.click('button:has-text("New Task")');
     await page.fill('input[name="title"]', 'Persistent Task');
     await page.click('button[type="submit"]:has-text("Create")');
     await page.waitForSelector('text=Persistent Task');
@@ -165,7 +165,7 @@ test.describe('Task Management E2E', () => {
 
   test('should update task inline', async ({ page }) => {
     // Create a task
-    await page.click('button:has-text("Add Task")');
+    await page.click('button:has-text("New Task")');
     await page.fill('input[name="title"]', 'Inline Edit Test');
     await page.click('button[type="submit"]:has-text("Create")');
     await page.waitForSelector('text=Inline Edit Test');
@@ -186,7 +186,7 @@ test.describe('Task Management E2E', () => {
 
   test('should handle concurrent operations', async ({ page, context }) => {
     // Create a task
-    await page.click('button:has-text("Add Task")');
+    await page.click('button:has-text("New Task")');
     await page.fill('input[name="title"]', 'Concurrent Test');
     await page.click('button[type="submit"]:has-text("Create")');
     await page.waitForSelector('text=Concurrent Test');
