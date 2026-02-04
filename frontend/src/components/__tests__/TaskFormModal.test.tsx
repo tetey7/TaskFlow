@@ -64,6 +64,7 @@ describe('TaskFormModal', () => {
           onClose={mockOnClose}
           onSuccess={mockOnSuccess}
           task={null}
+          mode="create"
         />
       );
 
