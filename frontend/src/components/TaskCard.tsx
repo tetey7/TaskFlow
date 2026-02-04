@@ -5,6 +5,7 @@ import { Task } from '@/types/task';
 import { tasksApi } from '@/lib/api';
 import { EditIcon, DeleteIcon } from './ui/icons';
 import { cn } from '@/lib/utils';
+import { PRIORITIES, PRIORITY_COLORS, PRIORITY_HOVER_COLORS, PRIORITY_OPTIONS } from '@/constants/priorities';
 
 interface TaskCardProps {
   task: Task;
@@ -183,11 +184,7 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
                   onDoubleClick={() => setEditingField('priority')}
                   className={cn(
                     'px-3 py-1 rounded-full text-sm font-medium cursor-pointer',
-                    {
-                      'bg-red-100 text-red-800': task.priority === 'high',
-                      'bg-yellow-100 text-yellow-800': task.priority === 'medium',
-                      'bg-green-100 text-green-800': task.priority === 'low',
-                    }
+                    PRIORITY_COLORS[task.priority as keyof typeof PRIORITY_COLORS]
                   )}
                 >
                   {task.priority}
@@ -195,24 +192,19 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
 
                 {editingField === 'priority' && (
                   <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-10 min-w-[120px]">
-                    <button
-                      onClick={() => handlePriorityChange('low')}
-                      className={cn(EDIT_STYLES.priorityButton, 'hover:bg-green-50 text-green-800')}
-                    >
-                      Low
-                    </button>
-                    <button
-                      onClick={() => handlePriorityChange('medium')}
-                      className={cn(EDIT_STYLES.priorityButton, 'hover:bg-yellow-50 text-yellow-800')}
-                    >
-                      Medium
-                    </button>
-                    <button
-                      onClick={() => handlePriorityChange('high')}
-                      className={cn(EDIT_STYLES.priorityButton, 'hover:bg-red-50 text-red-800')}
-                    >
-                      High
-                    </button>
+                    {PRIORITY_OPTIONS.map(({ value, label }) => (
+                      <button
+                        key={value}
+                        onClick={() => handlePriorityChange(value)}
+                        className={cn(
+                          EDIT_STYLES.priorityButton,
+                          PRIORITY_HOVER_COLORS[value],
+                          PRIORITY_COLORS[value]
+                        )}
+                      >
+                        {label}
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>
