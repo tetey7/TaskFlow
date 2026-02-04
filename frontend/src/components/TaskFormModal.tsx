@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { tasksApi } from '@/lib/api';
 import FormModal from './ui/FormModal';
+import { PRIORITIES, PRIORITY_OPTIONS } from '@/constants/priorities';
 
 interface Task {
   id?: number;
@@ -23,7 +24,7 @@ interface TaskFormModalProps {
 export default function TaskFormModal({ isOpen, onClose, onSuccess, task, mode }: TaskFormModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState('medium');
+  const [priority, setPriority] = useState<string>(PRIORITIES.MEDIUM);
   const [completed, setCompleted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -37,7 +38,7 @@ export default function TaskFormModal({ isOpen, onClose, onSuccess, task, mode }
     } else {
       setTitle('');
       setDescription('');
-      setPriority('medium');
+      setPriority(PRIORITIES.MEDIUM);
       setCompleted(false);
     }
     setError('');
@@ -64,7 +65,7 @@ export default function TaskFormModal({ isOpen, onClose, onSuccess, task, mode }
 
       setTitle('');
       setDescription('');
-      setPriority('medium');
+      setPriority(PRIORITIES.MEDIUM);
       setCompleted(false);
       onSuccess();
       onClose();
@@ -128,9 +129,11 @@ export default function TaskFormModal({ isOpen, onClose, onSuccess, task, mode }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                   disabled={isSubmitting}
                 >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
+                  {PRIORITY_OPTIONS.map(({ value, label }) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
