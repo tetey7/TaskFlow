@@ -28,7 +28,7 @@ test.describe('Task Management E2E', () => {
     await page.waitForLoadState('networkidle');
 
     // Wait for task to appear
-    await page.waitForSelector('text=E2E Test Task', { timeout: 10000 });
+    await page.locator('text=E2E Test Task').first().waitFor({ state: 'visible', timeout: 10000 });
 
     // Verify task appears in the list
     const taskCard = page.locator('text=E2E Test Task').first();
@@ -46,7 +46,7 @@ test.describe('Task Management E2E', () => {
     await page.fill('textarea#description', 'Testing CRUD operations');
     await page.click('button[type="submit"]:has-text("Create Task")');
     await page.waitForLoadState('networkidle');
-    await page.waitForSelector('text=CRUD Test Task', { timeout: 10000 });
+    await page.locator('text=CRUD Test Task').first().waitFor({ state: 'visible', timeout: 10000 });
 
     // 2. READ - Verify task exists
     const taskCard = page.locator('text=CRUD Test Task').first();
@@ -59,7 +59,7 @@ test.describe('Task Management E2E', () => {
     await page.fill('input#title', 'Updated CRUD Task');
     await page.click('button[type="submit"]:has-text("Update")');
     await page.waitForLoadState('networkidle');
-    await page.waitForSelector('text=Updated CRUD Task', { timeout: 10000 });
+    await page.locator('text=Updated CRUD Task').first().waitFor({ state: 'visible', timeout: 10000 });
     await expect(page.locator('text=Updated CRUD Task')).toBeVisible();
 
     // 4. COMPLETE - Mark as completed
@@ -88,7 +88,7 @@ test.describe('Task Management E2E', () => {
       await page.fill('textarea#description', `Description for ${taskTitle}`);
       await page.click('button[type="submit"]:has-text("Create Task")');
       await page.waitForLoadState('networkidle');
-      await page.waitForSelector(`text=${taskTitle}`, { timeout: 10000 });
+      await page.locator(`text=${taskTitle}`).first().waitFor({ state: 'visible', timeout: 10000 });
     }
 
     // Get initial order
@@ -163,7 +163,7 @@ test.describe('Task Management E2E', () => {
     await page.fill('textarea#description', 'Testing data persistence');
     await page.click('button[type="submit"]:has-text("Create Task")');
     await page.waitForLoadState('networkidle');
-    await page.waitForSelector('text=Persistent Task', { timeout: 10000 });
+    await page.locator('text=Persistent Task').first().waitFor({ state: 'visible', timeout: 10000 });
 
     // Reload the page
     await page.reload();
@@ -180,7 +180,7 @@ test.describe('Task Management E2E', () => {
     await page.fill('textarea#description', 'Testing inline editing');
     await page.click('button[type="submit"]:has-text("Create Task")');
     await page.waitForLoadState('networkidle');
-    await page.waitForSelector('text=Inline Edit Test', { timeout: 10000 });
+    await page.locator('text=Inline Edit Test').first().waitFor({ state: 'visible', timeout: 10000 });
 
     // Double-click to edit inline
     const taskTitle = page.locator('text=Inline Edit Test').first();
@@ -192,7 +192,7 @@ test.describe('Task Management E2E', () => {
     await input.press('Enter');
 
     // Verify update
-    await page.waitForSelector('text=Edited Inline');
+    await page.locator('text=Edited Inline').first().waitFor({ state: 'visible', timeout: 10000 });
     await expect(page.locator('text=Edited Inline')).toBeVisible();
   });
 
@@ -203,7 +203,7 @@ test.describe('Task Management E2E', () => {
     await page.fill('textarea#description', 'Testing concurrent operations');
     await page.click('button[type="submit"]:has-text("Create Task")');
     await page.waitForLoadState('networkidle');
-    await page.waitForSelector('text=Concurrent Test', { timeout: 10000 });
+    await page.locator('text=Concurrent Test').first().waitFor({ state: 'visible', timeout: 10000 });
 
     // Open same page in new tab
     const newPage = await context.newPage();
