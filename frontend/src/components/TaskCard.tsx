@@ -50,24 +50,20 @@ export default function TaskCard({ task, onEdit, onDelete, onToggleComplete, onT
       refs.title.current.select();
     } else if (editingField === 'description' && refs.description.current) {
       refs.description.current.focus();
-      refs.description.current.select();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editingField]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (refs.priority.current && !refs.priority.current.contains(event.target as Node)) {
-        setEditingField(null);
+      if (editingField === 'priority' && refs.priority.current && !refs.priority.current.contains(event.target as Node)) {
+        saveField('priority');
       }
     };
 
-    if (editingField === 'priority') {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editingField]);
 
   useEffect(() => {
