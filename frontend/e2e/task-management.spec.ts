@@ -53,11 +53,10 @@ test.describe('Task Management E2E', () => {
     await expect(taskCard).toBeVisible();
 
     // 3. UPDATE - Edit the task
-    await taskCard.click(); // Click to edit
-    await page.click('button[aria-label="Edit task"]');
+    await page.locator('button[title="Edit task"]').first().click();
 
     await page.fill('input#title', 'Updated CRUD Task');
-    await page.click('button[type="submit"]:has-text("Update")');
+    await page.click('button[type="submit"]:has-text("Update Task")');
     await page.waitForLoadState('networkidle');
     await page.locator('text=Updated CRUD Task').first().waitFor({ state: 'visible', timeout: 10000 });
     await expect(page.locator('text=Updated CRUD Task')).toBeVisible();
@@ -71,7 +70,7 @@ test.describe('Task Management E2E', () => {
     await expect(completedTask).toHaveClass(/line-through/);
 
     // 5. DELETE
-    await page.click('button[aria-label="Delete task"]');
+    await page.locator('button[title="Delete task"]').first().click();
     await page.click('button:has-text("Delete Task")'); // Confirm deletion
 
     // Verify task is removed
