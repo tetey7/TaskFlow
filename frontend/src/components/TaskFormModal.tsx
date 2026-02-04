@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { tasksApi } from '@/lib/api';
-import FormModal from './FormModal';
+import FormModal from './ui/FormModal';
 
 interface Task {
   id?: number;

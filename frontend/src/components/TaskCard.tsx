@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Task } from '@/types/task';
 import { tasksApi } from '@/lib/api';
-import { EditIcon, DeleteIcon } from './icons';
+import { EditIcon, DeleteIcon } from './ui/icons';
 import { cn } from '@/lib/utils';
 
 interface TaskCardProps {
