@@ -90,7 +90,7 @@ export const tasksApi = {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ tasks }),
+      body: JSON.stringify({ task_orders: tasks }),
     });
     return handleResponse<void>(response);
   },
