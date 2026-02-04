@@ -41,7 +41,7 @@ export default function DeleteTaskModal({ isOpen, onClose, onSuccess, taskId, ta
       message={
         <>
           <p className="text-gray-700">
-            Are you sure you want to delete <span className="font-semibold">"{taskTitle}"</span>?
+            Are you sure you want to delete <span className="font-semibold">&ldquo;{taskTitle}&rdquo;</span>?
           </p>
           <p className="text-gray-500 text-sm mt-2">
             This action cannot be undone.
