@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@/test-utils'
+import { render, screen, fireEvent, waitFor } from '@/lib/test-utils'
 import TaskCard from '../TaskCard'
 import { Task } from '@/types/task'
 import { tasksApi } from '@/lib/api'
