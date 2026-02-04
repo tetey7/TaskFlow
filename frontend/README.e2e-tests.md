@@ -254,37 +254,91 @@ test.use({
 
 ## CI/CD Integration
 
-### GitHub Actions Example
+### GitHub Actions (Configured ✅)
 
+E2E tests are **already configured** to run on CI/CD! See:
+- **`.github/workflows/e2e-tests.yml`** - Dedicated E2E test workflow
+- **`.github/workflows/ci.yml`** - Complete CI/CD pipeline (all tests)
+
+### What Runs on CI/CD
+
+**On every push and pull request:**
+
+1. **Backend Tests** (Job 1)
+   - Linting (black, isort, flake8)
+   - Unit tests (13 tests)
+   - Integration tests (10 tests)
+   - Coverage report to Codecov
+
+2. **Frontend Tests** (Job 2)
+   - Linting (ESLint)
+   - Unit tests (9 tests)
+   - Coverage report to Codecov
+
+3. **E2E Tests** (Job 3) - Runs after jobs 1 & 2 pass
+   - Starts PostgreSQL database
+   - Runs Django backend
+   - Builds Next.js frontend
+   - Runs Playwright E2E tests (10 tests)
+   - Uploads test reports and screenshots
+
+4. **Build Verification** (Job 4)
+   - Verifies production build works
+
+### CI/CD Features
+
+✅ **Parallel execution** - Backend and frontend tests run simultaneously
+✅ **PostgreSQL database** - Real database, not SQLite
+✅ **Test artifacts** - Playwright reports and screenshots uploaded
+✅ **Coverage tracking** - Codecov integration
+✅ **Failure screenshots** - Automatic screenshots on test failure
+✅ **Smart caching** - pip and npm caches for faster builds
+
+### Viewing Test Results
+
+**On GitHub:**
+1. Go to your repository
+2. Click "Actions" tab
+3. Click on a workflow run
+4. View test results and download artifacts
+
+**Playwright Report:**
+- Download "playwright-report" artifact
+- Extract and open `index.html` in browser
+- Interactive report with traces, screenshots, and videos
+
+**Test Screenshots (on failure):**
+- Download "test-screenshots" artifact
+- View screenshots of failed tests
+
+### Environment Variables for CI
+
+The workflows use these environment variables:
 ```yaml
-name: E2E Tests
+DATABASE_URL: postgresql://taskflow:taskflow_password@localhost:5432/taskflow_db
+SECRET_KEY: test-secret-key-for-ci
+DEBUG: 'True'
+CI: true
+```
 
-on: [push, pull_request]
+### Customizing CI/CD
 
-jobs:
-  e2e:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+**To run E2E tests only on main branch:**
+```yaml
+# In .github/workflows/e2e-tests.yml
+on:
+  push:
+    branches: [main]
+```
 
-      - name: Start services
-        run: docker-compose up -d
+**To skip E2E tests in PR:**
+Add `[skip e2e]` to your commit message
 
-      - name: Install dependencies
-        run: cd frontend && npm ci
-
-      - name: Install Playwright browsers
-        run: cd frontend && npx playwright install --with-deps
-
-      - name: Run E2E tests
-        run: cd frontend && npm run test:e2e
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: playwright-report
-          path: frontend/playwright-report/
+**To run on schedule:**
+```yaml
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight
 ```
 
 ## Test Coverage
