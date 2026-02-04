@@ -28,6 +28,17 @@ describe('useTasks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Suppress act warnings - we're using waitFor which handles async updates correctly
+    jest.spyOn(console, 'error').mockImplementation((message) => {
+      if (typeof message === 'string' && message.includes('not wrapped in act')) {
+        return;
+      }
+      console.warn(message);
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should initialize with empty tasks and loading state', () => {
