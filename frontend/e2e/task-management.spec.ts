@@ -74,7 +74,7 @@ test.describe('Task Management E2E', () => {
     await page.click('button:has-text("Delete Task")'); // Confirm deletion
 
     // Verify task is removed
-    await expect(page.locator('text=Updated CRUD Task')).not.toBeVisible();
+    await expect(page.locator('text=Updated CRUD Task').first()).not.toBeVisible();
   });
 
   test('should reorder tasks via drag and drop', async ({ page }) => {
@@ -129,18 +129,18 @@ test.describe('Task Management E2E', () => {
       await page.selectOption('select#priority', task.priority);
       await page.click('button[type="submit"]:has-text("Create Task")');
       await page.waitForLoadState('networkidle');
-      await page.waitForSelector(`text=${task.title}`, { timeout: 10000 });
+      await page.locator(`text=${task.title}`).first().waitFor({ state: 'visible', timeout: 10000 });
     }
 
     // Verify all tasks are visible initially
     for (const task of taskData) {
-      await expect(page.locator(`text=${task.title}`)).toBeVisible();
+      await expect(page.locator(`text=${task.title}`).first()).toBeVisible();
     }
 
     // Test priority badges are correct
-    await expect(page.locator('.bg-green-100:has-text("Low")')).toBeVisible();
-    await expect(page.locator('.bg-yellow-100:has-text("Medium")')).toBeVisible();
-    await expect(page.locator('.bg-red-100:has-text("High")')).toBeVisible();
+    await expect(page.locator('.bg-green-100:has-text("Low")').first()).toBeVisible();
+    await expect(page.locator('.bg-yellow-100:has-text("Medium")').first()).toBeVisible();
+    await expect(page.locator('.bg-red-100:has-text("High")').first()).toBeVisible();
   });
 
   test('should handle API errors gracefully', async ({ page }) => {
@@ -169,7 +169,7 @@ test.describe('Task Management E2E', () => {
     await page.waitForLoadState('networkidle');
 
     // Verify task still exists
-    await expect(page.locator('text=Persistent Task')).toBeVisible();
+    await expect(page.locator('text=Persistent Task').first()).toBeVisible();
   });
 
   test('should update task inline', async ({ page }) => {
@@ -182,17 +182,22 @@ test.describe('Task Management E2E', () => {
     await page.locator('text=Inline Edit Test').first().waitFor({ state: 'visible', timeout: 10000 });
 
     // Double-click to edit inline
-    const taskTitle = page.locator('text=Inline Edit Test').first();
+    const taskTitle = page.locator('h2:has-text("Inline Edit Test")').first();
     await taskTitle.dblclick();
 
-    // Edit the title
-    const input = page.locator('input[value="Inline Edit Test"]');
-    await input.fill('Edited Inline');
-    await input.press('Enter');
+    // Wait for input to appear
+    const input = page.locator('input.text-xl.font-semibold').first();
+    await input.waitFor({ state: 'visible', timeout: 5000 });
+
+    // Use keyboard to edit (select all and type new value)
+    await input.focus();
+    await page.keyboard.press('Control+A'); // Select all
+    await page.keyboard.type('Edited Inline');
+    await page.keyboard.press('Enter');
 
     // Verify update
     await page.locator('text=Edited Inline').first().waitFor({ state: 'visible', timeout: 10000 });
-    await expect(page.locator('text=Edited Inline')).toBeVisible();
+    await expect(page.locator('text=Edited Inline').first()).toBeVisible();
   });
 
   test('should handle concurrent operations', async ({ page, context }) => {
@@ -210,8 +215,8 @@ test.describe('Task Management E2E', () => {
     await newPage.waitForLoadState('networkidle');
 
     // Both pages should show the task
-    await expect(page.locator('text=Concurrent Test')).toBeVisible();
-    await expect(newPage.locator('text=Concurrent Test')).toBeVisible();
+    await expect(page.locator('text=Concurrent Test').first()).toBeVisible();
+    await expect(newPage.locator('text=Concurrent Test').first()).toBeVisible();
 
     // Update from first page
     const checkbox1 = page.locator('input[type="checkbox"]').first();
@@ -256,6 +261,6 @@ test.describe('API Integration', () => {
     // Verify in UI
     await page.goto('/tasks');
     await page.waitForLoadState('networkidle');
-    await expect(page.locator('text=API Created Task')).toBeVisible();
+    await expect(page.locator('text=API Created Task').first()).toBeVisible();
   });
 });

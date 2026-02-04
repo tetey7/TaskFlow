@@ -43,7 +43,7 @@ function SortableTaskCard({ task, onEdit, onDelete, onToggleComplete, onTaskUpda
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...(!isEditing && listeners)}>
+    <div ref={setNodeRef} style={style} {...attributes} {...(!isEditing && listeners)} data-testid="task-card">
       <TaskCard
         task={task}
         onEdit={onEdit}
