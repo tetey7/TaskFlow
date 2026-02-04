@@ -24,8 +24,11 @@ test.describe('Task Management E2E', () => {
     // Submit the form
     await page.click('button[type="submit"]:has-text("Create Task")');
 
-    // Wait for modal to close and task to appear
-    await page.waitForSelector('text=E2E Test Task');
+    // Wait for modal to close and network to be idle (task created)
+    await page.waitForLoadState('networkidle');
+
+    // Wait for task to appear
+    await page.waitForSelector('text=E2E Test Task', { timeout: 10000 });
 
     // Verify task appears in the list
     const taskCard = page.locator('text=E2E Test Task').first();
