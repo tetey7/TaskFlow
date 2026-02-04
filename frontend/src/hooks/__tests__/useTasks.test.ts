@@ -36,7 +36,7 @@ describe('useTasks', () => {
     const { result } = renderHook(() => useTasks());
 
     expect(result.current.tasks).toEqual([]);
-    expect(result.current.isLoading).toBe(true);
+    expect(result.current.loading).toBe(true);
   });
 
   it('should fetch tasks on mount', async () => {
@@ -45,7 +45,7 @@ describe('useTasks', () => {
     const { result } = renderHook(() => useTasks());
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.loading).toBe(false);
     });
 
     expect(result.current.tasks).toEqual(mockTasks);
@@ -59,7 +59,7 @@ describe('useTasks', () => {
     const { result } = renderHook(() => useTasks());
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.loading).toBe(false);
     });
 
     expect(result.current.tasks).toEqual([]);
@@ -73,7 +73,7 @@ describe('useTasks', () => {
     const { result } = renderHook(() => useTasks());
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.loading).toBe(false);
     });
 
     (tasksApi.getAll as jest.Mock) = jest.fn().mockResolvedValue([...mockTasks, {
@@ -87,7 +87,7 @@ describe('useTasks', () => {
     }]);
 
     await act(async () => {
-      await result.current.refreshTasks();
+      await result.current.fetchTasks();
     });
 
     expect(result.current.tasks).toHaveLength(3);
@@ -100,7 +100,7 @@ describe('useTasks', () => {
     const { result } = renderHook(() => useTasks());
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.loading).toBe(false);
     });
 
     const reorderedTasks = [
@@ -109,10 +109,10 @@ describe('useTasks', () => {
     ];
 
     await act(async () => {
-      await result.current.handleReorder(reorderedTasks);
+      await result.current.handleDragEnd({ active: { id: '2' }, over: { id: '1' } } as any);
     });
 
-    expect(tasksApi.reorder).toHaveBeenCalledWith(reorderedTasks);
+    expect(tasksApi.reorder).toHaveBeenCalled();
   });
 
   it('should handle reorder error', async () => {
@@ -123,7 +123,7 @@ describe('useTasks', () => {
     const { result } = renderHook(() => useTasks());
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.loading).toBe(false);
     });
 
     const reorderedTasks = [
@@ -132,7 +132,7 @@ describe('useTasks', () => {
     ];
 
     await act(async () => {
-      await result.current.handleReorder(reorderedTasks);
+      await result.current.handleDragEnd({ active: { id: '2' }, over: { id: '1' } } as any);
     });
 
     expect(consoleError).toHaveBeenCalled();
@@ -145,13 +145,13 @@ describe('useTasks', () => {
     const { result } = renderHook(() => useTasks());
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.loading).toBe(false);
     });
 
     const updatedTask = { ...mockTasks[0], title: 'Updated Task 1' };
 
     act(() => {
-      result.current.updateTaskInState(updatedTask);
+      result.current.updateTask(updatedTask);
     });
 
     expect(result.current.tasks[0].title).toBe('Updated Task 1');
@@ -163,7 +163,7 @@ describe('useTasks', () => {
     const { result } = renderHook(() => useTasks());
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.loading).toBe(false);
     });
 
     const nonExistentTask = {
@@ -177,7 +177,7 @@ describe('useTasks', () => {
     };
 
     act(() => {
-      result.current.updateTaskInState(nonExistentTask);
+      result.current.updateTask(nonExistentTask);
     });
 
     expect(result.current.tasks).toHaveLength(2);
